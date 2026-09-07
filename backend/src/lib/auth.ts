@@ -1,14 +1,13 @@
 import jwt from "jsonwebtoken";
 import { NextFunction, Request, Response } from "express";
-
-const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-me";
+import { env } from "./env";
 
 export interface AuthedRequest extends Request {
   userId?: string;
 }
 
 export function signToken(userId: string): string {
-  return jwt.sign({ sub: userId }, JWT_SECRET, { expiresIn: "30d" });
+  return jwt.sign({ sub: userId }, env.jwtSecret, { expiresIn: "30d" });
 }
 
 export function requireAuth(req: AuthedRequest, res: Response, next: NextFunction) {
@@ -18,7 +17,7 @@ export function requireAuth(req: AuthedRequest, res: Response, next: NextFunctio
   }
   const token = header.slice("Bearer ".length);
   try {
-    const payload = jwt.verify(token, JWT_SECRET) as { sub: string };
+    const payload = jwt.verify(token, env.jwtSecret) as { sub: string };
     req.userId = payload.sub;
     next();
   } catch {

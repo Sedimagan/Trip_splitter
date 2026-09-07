@@ -1,26 +1,18 @@
 import { Router } from "express";
 import multer from "multer";
-import path from "path";
-import crypto from "crypto";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { requireAuth, AuthedRequest } from "../lib/auth";
 import { computeSplits, SplitType } from "../lib/splitCalc";
 import { emitToTrip } from "../lib/realtime";
+import { storeReceiptImage } from "../lib/storage";
 import { serializeExpense, assertMember } from "./trips";
 
 const router = Router();
 router.use(requireAuth);
 
-const storage = multer.diskStorage({
-  destination: path.join(__dirname, "..", "..", "uploads"),
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname) || "";
-    cb(null, `${crypto.randomUUID()}${ext}`);
-  },
-});
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (/^image\/(jpeg|png|webp|heic|heif)$/.test(file.mimetype)) cb(null, true);
@@ -28,9 +20,10 @@ const upload = multer({
   },
 });
 
-router.post("/upload", upload.single("receipt"), (req, res) => {
+router.post("/upload", upload.single("receipt"), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file uploaded" });
-  return res.status(201).json({ url: `/uploads/${req.file.filename}` });
+  const url = await storeReceiptImage(req.file.buffer, req.file.mimetype);
+  return res.status(201).json({ url });
 });
 
 const expenseSchema = z.object({

@@ -4,10 +4,14 @@ Split trip costs with friends — for iOS and Android, from one codebase.
 
 ## What's here
 
-- **`backend/`** — Node.js + TypeScript + Express API, SQLite via Prisma, real-time
-  updates over Socket.io, receipt image uploads.
+- **`backend/`** — Node.js + TypeScript + Express API, PostgreSQL via Prisma, real-time
+  updates over Socket.io, receipt image uploads (local disk in dev, S3-compatible object
+  storage in production).
 - **`mobile/`** — Expo (React Native + TypeScript) app that runs on iOS, Android, and web
   from a single codebase.
+
+Ready to deploy this for real, on real app stores? See **[PRODUCTION.md](./PRODUCTION.md)**
+for the full deployment, app-store-submission, and security-hardening runbook.
 
 ## Features (current scope)
 
@@ -30,6 +34,8 @@ Split trip costs with friends — for iOS and Android, from one codebase.
 ## Prerequisites
 
 - Node.js 18+
+- PostgreSQL — either install it locally, or run `docker compose up -d` from `backend/`
+  to start one in a container (see `backend/docker-compose.yml`)
 - For running on a device/simulator: [Expo Go](https://expo.dev/go) app (easiest), or
   Xcode (iOS) / Android Studio (Android) for a native build
 
@@ -38,8 +44,8 @@ Split trip costs with friends — for iOS and Android, from one codebase.
 ```bash
 cd backend
 npm install
-cp .env.example .env      # already present with dev defaults; edit if needed
-npm run prisma:migrate    # creates the local SQLite database
+cp .env.example .env      # edit DATABASE_URL if your local Postgres differs
+npm run prisma:migrate    # applies migrations to your local Postgres database
 npm run dev                # starts the API on http://localhost:4000
 ```
 
