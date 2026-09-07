@@ -10,6 +10,7 @@ import HomeScreen from "../screens/HomeScreen";
 import CreateTripScreen from "../screens/CreateTripScreen";
 import TripDetailScreen from "../screens/TripDetailScreen";
 import AddEditExpenseScreen from "../screens/AddEditExpenseScreen";
+import DeleteAccountScreen from "../screens/DeleteAccountScreen";
 import { colors } from "../theme";
 
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
@@ -48,6 +49,11 @@ function AppNavigator() {
         name="AddEditExpense"
         component={AddEditExpenseScreen}
         options={({ route }) => ({ title: route.params.expenseId ? "Edit Expense" : "Add Expense" })}
+      />
+      <AppStack.Screen
+        name="DeleteAccount"
+        component={DeleteAccountScreen}
+        options={{ title: "Delete Account" }}
       />
     </AppStack.Navigator>
   );

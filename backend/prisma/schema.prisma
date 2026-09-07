@@ -14,6 +14,7 @@ model User {
   phone           String?        @unique
   passwordHash    String?
   isPlaceholder   Boolean        @default(false)
+  deletedAt       DateTime?
   createdAt       DateTime       @default(now())
   tripMembers     TripMember[]
   paidExpenses    Expense[]      @relation("PaidBy")

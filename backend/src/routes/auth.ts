@@ -113,4 +113,45 @@ router.get("/me", requireAuth, async (req: AuthedRequest, res) => {
   return res.json({ id: user.id, name: user.name, email: user.email, phone: user.phone });
 });
 
+const deleteAccountSchema = z.object({
+  password: z.string().min(1, "Enter your password to confirm"),
+});
+
+/**
+ * Soft-deletes the account: the user is scrubbed of personal info and can no
+ * longer log in, but their id and historical expenses/splits stay in place
+ * so trip balances for other members keep adding up correctly. Requires the
+ * current password so a stolen/leaked (but not yet expired) token can't be
+ * used to destroy the account.
+ */
+router.delete("/me", requireAuth, async (req: AuthedRequest, res) => {
+  const parsed = deleteAccountSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: parsed.error.issues[0].message });
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: req.userId! } });
+  if (!user || !user.passwordHash) {
+    return res.status(404).json({ error: "User not found" });
+  }
+
+  const valid = await bcrypt.compare(parsed.data.password, user.passwordHash);
+  if (!valid) {
+    return res.status(401).json({ error: "Incorrect password" });
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      name: "Deleted user",
+      email: null,
+      phone: null,
+      passwordHash: null,
+      deletedAt: new Date(),
+    },
+  });
+
+  return res.status(204).send();
+});
+
 export default router;

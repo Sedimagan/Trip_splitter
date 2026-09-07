@@ -188,26 +188,28 @@ need a store build. Worth adding once you're past initial launch.
 
 ---
 
-## 4. Required before you can actually submit: account deletion + privacy policy
+## 4. Account deletion + privacy policy
 
-Two things are **hard requirements**, not nice-to-haves, and aren't built
-yet:
+Both of these are **hard requirements** for store submission and are now
+built — but each has one manual step left before it's actually live:
 
-1. **In-app account deletion.** Apple's App Store Review Guideline 5.1.1(v)
-   requires any app with account creation to let users delete their account
-   from inside the app, not just via a web form. The clean way to do this
-   here without corrupting other people's trip history is a **soft
-   delete/anonymize**: mark the user inactive, clear their name to
-   "Deleted user", clear email/phone/password so they can't log in — but
-   keep their historical expense and split records intact (other trip
-   members' balances still need to add up correctly). I didn't build this
-   yet since it's a real feature decision, not a config change — say the
-   word and I'll add the endpoint + a "Delete account" screen.
-2. **A hosted Privacy Policy** (and ideally Terms of Service) at a public
-   URL, describing what you collect (name, email/phone, trip and expense
-   data, receipt photos) and how it's used/stored. Both stores require the
-   URL at submission. This can be a simple static page — happy to draft one
-   if useful.
+1. **In-app account deletion** — done. Home → "Delete account" (mobile) calls
+   `DELETE /api/auth/me` (backend, password-confirmed). It's a **soft
+   delete/anonymize**: name, email/phone, and password are cleared and the
+   account can no longer log in or use any existing token (`requireAuth` now
+   checks this on every request, so a leaked token stops working
+   immediately) — but historical expense/split rows stay in place, re-labeled
+   "Deleted user," so other trip members' balances keep adding up correctly.
+   Nothing left to do here.
+2. **Privacy Policy + Terms of Service** — a full draft is written, matching
+   exactly what the app collects and does (including the deletion behavior
+   above). It's linked from the mobile Signup screen via
+   `mobile/src/config.ts` (`PRIVACY_POLICY_URL` / `TERMS_OF_SERVICE_URL`),
+   currently pointing at placeholder URLs. **Before submission**: have a
+   lawyer review it (see the callout at the top of the draft for what's
+   still a placeholder — entity name, support email, jurisdiction), publish
+   the final text at a permanent URL on your own domain, and update those two
+   constants to point at it.
 
 ---
 
@@ -228,6 +230,9 @@ yet:
 - [x] Secrets kept out of git (`.env` gitignored everywhere, `.env.example`
   committed instead)
 - [x] Object storage credentials scoped to one bucket (once you follow §2.3)
+- [x] In-app account deletion, with immediate token revocation (§4)
+- [x] Privacy Policy + Terms of Service drafted, linked from the app (§4 —
+  still needs your legal review + a permanent URL before submission)
 
 **Do before/shortly after launch:**
 - [ ] Generate a fresh, unique `JWT_SECRET` for production (never reuse the
@@ -238,8 +243,9 @@ yet:
 - [ ] Add uptime monitoring on `/health`
 - [ ] Put the repo's `npm audit` / Dependabot (GitHub → Settings → Security)
   on autopilot so dependency CVEs surface automatically
-- [ ] Write and host a Privacy Policy + Terms of Service (§4)
-- [ ] Build account deletion (§4)
+- [ ] Have a lawyer review the Privacy Policy/Terms draft, then host the
+  final version and update `PRIVACY_POLICY_URL`/`TERMS_OF_SERVICE_URL` in
+  `mobile/src/config.ts` (§4)
 - [ ] Consider shortening JWT expiry (currently 30 days) with a refresh-token
   flow if you want tighter session control — a reasonable v2 hardening step,
   not a launch blocker
@@ -284,7 +290,8 @@ Not a quote, just so nothing surprises you:
 2. Point `mobile/eas.json`'s `production` profile at that live backend URL.
 3. Build a `preview` mobile build, install it on a real device, and use the
    app for real against the live backend for a few days.
-4. Build account deletion + privacy policy (§4) — required for submission.
+4. Get the Privacy Policy/Terms draft (§4) reviewed by a lawyer, host the
+   final text, and update the two URL constants in `mobile/src/config.ts`.
 5. Add Sentry + uptime monitoring.
 6. `eas build --profile production` → TestFlight / Play Internal testing.
 7. Submit for store review on both platforms.

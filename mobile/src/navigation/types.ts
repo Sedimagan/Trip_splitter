@@ -8,4 +8,5 @@ export type AppStackParamList = {
   CreateTrip: undefined;
   TripDetail: { tripId: string; tripName: string };
   AddEditExpense: { tripId: string; expenseId?: string };
+  DeleteAccount: undefined;
 };

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   ScrollView,
   StyleSheet,
@@ -15,6 +16,7 @@ import { AuthStackParamList } from "../navigation/types";
 import { useAuth } from "../context/AuthContext";
 import { ApiError } from "../api/client";
 import { colors, radius, spacing } from "../theme";
+import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from "../config";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "Signup">;
 
@@ -105,6 +107,18 @@ export default function SignupScreen({ navigation }: Props) {
           <TouchableOpacity onPress={() => navigation.navigate("Login")}>
             <Text style={styles.link}>Already have an account? Log in</Text>
           </TouchableOpacity>
+
+          <Text style={styles.legal}>
+            By signing up, you agree to our{" "}
+            <Text style={styles.legalLink} onPress={() => Linking.openURL(TERMS_OF_SERVICE_URL)}>
+              Terms of Service
+            </Text>{" "}
+            and{" "}
+            <Text style={styles.legalLink} onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}>
+              Privacy Policy
+            </Text>
+            .
+          </Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -144,4 +158,12 @@ const styles = StyleSheet.create({
   },
   buttonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
   link: { color: colors.primary, textAlign: "center", marginTop: spacing.md, fontSize: 14 },
+  legal: {
+    fontSize: 12,
+    color: colors.textMuted,
+    textAlign: "center",
+    marginTop: spacing.lg,
+    lineHeight: 17,
+  },
+  legalLink: { color: colors.primary, fontWeight: "600" },
 });

@@ -51,9 +51,14 @@ export default function HomeScreen({ navigation }: Props) {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.greeting}>Hi, {user?.name?.split(" ")[0]} 👋</Text>
-        <TouchableOpacity onPress={logout}>
-          <Text style={styles.logout}>Log out</Text>
-        </TouchableOpacity>
+        <View style={{ alignItems: "flex-end", gap: 4 }}>
+          <TouchableOpacity onPress={logout}>
+            <Text style={styles.logout}>Log out</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate("DeleteAccount")}>
+            <Text style={styles.deleteAccountLink}>Delete account</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <FlatList
@@ -116,6 +121,7 @@ const styles = StyleSheet.create({
   },
   greeting: { fontSize: 20, fontWeight: "700", color: colors.text },
   logout: { color: colors.primary, fontSize: 14 },
+  deleteAccountLink: { color: colors.textMuted, fontSize: 11 },
   listContent: { padding: spacing.lg, paddingBottom: 100, gap: spacing.md },
   card: {
     backgroundColor: colors.card,
